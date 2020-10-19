@@ -134,12 +134,12 @@ public class Kmeans {
     }
     
     @SuppressWarnings("deprecation")
-    public static void run(String centerPath,String dataPath,String newCenterPath,boolean runReduce) throws IOException, ClassNotFoundException, InterruptedException{
+    public static void run(String centerPath,String dataPath,String newCenterPath,int count,boolean runReduce) throws IOException, ClassNotFoundException, InterruptedException{
         
         Configuration conf = new Configuration();
         conf.set("centersPath", centerPath);
         
-        Job job = new Job(conf, "K-means");
+        Job job = new Job(conf, "K-means:"+count);
         job.setJarByClass(Kmeans.class);
         
         job.setMapperClass(Map.class);
@@ -168,16 +168,16 @@ public class Kmeans {
         
         
         while(true){
+            System.out.println(" Iterator  " + ++count);
+            run(centerPath,dataPath,newCenterPath,count,true);
             
-            run(centerPath,dataPath,newCenterPath,true);
-            System.out.println(" epoch " + ++count);
             if(compareCenters(centerPath,newCenterPath )){
-                run(centerPath,dataPath,newCenterPath,false);
+                run(centerPath,dataPath,newCenterPath,count,false);
                 //break;
             }
             
             if(count >= Integer.parseInt(args[3])){ // 執行幾次
-                run(centerPath,dataPath,newCenterPath,false);
+                run(centerPath,dataPath,newCenterPath,count,false);
                 break;
             }
         }
@@ -251,10 +251,10 @@ public class Kmeans {
             }
         }
         
-        if(distance == 0.0){            
+        /*if(distance == 0.0){            
             deletePath(newPath);
             return true;
-        }else{           
+        }else{  */         
             
             Configuration conf = new Configuration();
             Path outPath = new Path(centerPath);
@@ -274,7 +274,7 @@ public class Kmeans {
             }
             
             deletePath(newPath);
-        }
+        //}
         
         return false;
     }
